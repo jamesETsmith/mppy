@@ -1,5 +1,7 @@
-name: test
+name: mppy
 channels:
+  - anaconda
+  - conda-forge
 dependencies:
     # Base depends
   - python
@@ -10,7 +12,14 @@ dependencies:
   - pytest-cov
   - codecov
 
-    # Pip-only installs
-  #- pip:
-  #  - codecov
+    # mppy
+  - nomkl
+  - numpy
+  - scipy
+  - matplotlib
+  - seaborn
+  - mendeleev
+  - cclib
+  - pip:
+   - pyscf
 
