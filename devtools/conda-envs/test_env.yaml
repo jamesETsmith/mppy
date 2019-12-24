@@ -3,15 +3,13 @@ channels:
   - anaconda
   - conda-forge
 dependencies:
-    # Base depends
+  # Base depends
   - python
   - pip
-
     # Testing
   - pytest
   - pytest-cov
   - codecov
-
     # mppy
   - nomkl
   - numpy
@@ -21,5 +19,4 @@ dependencies:
   - mendeleev
   - cclib
   - pip:
-   - pyscf
-
+      - pyscf
