@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import matplotlib.pyplot as plt
 
 from mppy.mpMolecule import mpMolecule
 
@@ -37,3 +38,12 @@ def test_mpMolecule_bonds():
 
     bonds = np.array([[0, 1], [0, 2], [0, 3], [1, 4], [1, 5]])
     npt.assert_equal(bonds, mol._bonds)
+
+
+def test_mpMolecule_plot():
+    mol = setup()
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    mol.plot(ax)
+    # plt.show()
+    plt.close()
