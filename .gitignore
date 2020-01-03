@@ -98,6 +98,8 @@ ENV/
 # mkdocs documentation
 /site
 
-# mypy
-.mypy_cache/
+# mppy
+.mppy_cache/
 .vscode
+examples/data
+examples/figures

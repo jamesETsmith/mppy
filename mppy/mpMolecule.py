@@ -46,7 +46,8 @@ class mpMolecule:
             self._mass = mass
 
         # Bonds
-        self._bonds = bonds
+        # self._bonds = bonds
+        self.get_bonds_by_distance()
 
     def plot(self, ax, show_legend=False):
         """Plot the molecule on the given axis"""

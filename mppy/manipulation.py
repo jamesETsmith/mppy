@@ -20,10 +20,6 @@ def align_vectors(v1, v2):
     `np.ndarray`
         3x3 rotation matrix that should be applied to v1.
     
-    Raises
-    ------
-    AssertionError
-        [description]
     """
 
     # Vector we will rotate about
@@ -32,27 +28,6 @@ def align_vectors(v1, v2):
 
     # Angle we need to rotate
     th = np.arccos(np.dot(v1, v2) / (la.norm(v1) * la.norm(v2)))
-
-    # # Euler/Rodrigues params
-    # # See https://en.wikipedia.org/wiki/Euler%E2%80%93Rodrigues_formula
-    # a = np.cos(th / 2.0)
-    # b = k[0] * np.sin(th / 2.0)
-    # c = k[1] * np.sin(th / 2.0)
-    # d = k[2] * np.sin(th / 2.0)
-
-    # print("CHECK %f = 1" % (a ** 2 + b ** 2 + c ** 2 + d ** 2))
-
-    # if 1 != (a ** 2 + b ** 2 + c ** 2 + d ** 2):
-    #     raise AssertionError("Something went wrong with rotation.")
-
-    # r = np.array(
-    #     [
-    #         [a * a + b * b - c * c - d * d, 2 * (b * c - a * d), 2 * (b * d + a * c)],
-    #         [2 * (b * c + a * d), a * a + c * c - b * b - d * d, 2 * (c * d - a * b)],
-    #         [2 * (b * d - a * c), 2 * (c * d + a * b), a * a + d * d - b * b - c * c],
-    #     ]
-    # )
-
     return rotate(k, th)
 
 
@@ -92,31 +67,28 @@ def rotate(k: np.ndarray, th: float) -> np.ndarray:
     return r
 
 
-def rotate_dihedral(
-    p1: int, p2: int, th: float, npts: int, rotor: np.ndarray, xyz: np.ndarray
-):
+def rotate_dihedral(xyz: np.ndarray, p1: int, p2: int, th: float, rotor: np.ndarray):
     """Rotate dihedral angle in molecule. Dihedral bond is always aligned to
-    z-axis. Returns the original geometry + npts new rotated geometries.
+    z-axis. Returns a single rotated geometry.
     
     Parameters
     ----------
+    xyz : `np.ndarray
+        2D ndarray of atom coordinates.
     p1 : int
         Index of pivot atom 1 in xyz array.
     p2 : int
         Index of pivot atom 2 in xyz array.
     th : float
         Angle to rotate rotor by.
-    npts : int
-        Number of rotations to perform.
     rotor : `np.ndarray`
         Array of indices of atoms that will be rotated.
-    xyz : `np.ndarray
-        2D ndarray of atom coordinates.
+
     
     Returns
     -------
     `np.ndarray`
-        3D ndarray of rotated atom coordinates.
+        2D ndarray of rotated atom coordinates.
     """
 
     # Translate pivot 1 to the origin.
@@ -129,26 +101,29 @@ def rotate_dihedral(
     xyz = np.einsum("ij,kj->ik", xyz, r_mat)
 
     #
-    rotated_xyz = np.zeros((npts + 1, xyz.shape[0], xyz.shape[1]))
-    rotated_xyz[0, :, :] = xyz
+    # rotated_xyz = np.zeros((npts + 1, xyz.shape[0], xyz.shape[1]))
+    # rotated_xyz[0, :, :] = xyz
 
-    for i in range(1, npts + 1):
-        rotated_xyz[i, :, :] = rotated_xyz[i - 1, :, :]
-        rtr = rotated_xyz[i, rotor, :]
-        r = rotate(v2, th)
-        rtr = np.einsum("ij,kj->ik", rtr, r)
-        rotated_xyz[i, rotor, :] = rtr
+    # for i in range(1, npts + 1):
+    #     rotated_xyz[i, :, :] = rotated_xyz[i - 1, :, :]
+    #     rtr = rotated_xyz[i, rotor, :]
+    #     r = rotate(v2, th)
+    #     rtr = np.einsum("ij,kj->ik", rtr, r)
+    #     rotated_xyz[i, rotor, :] = rtr
+    rotated_xyz = xyz.copy()
+    rot_op = rotate(v2, th)
+    rotated_xyz[rotor, :] = np.einsum("ij,kj->ik", rotated_xyz[rotor, :], rot_op)
 
     return rotated_xyz
 
 
-def pyramidalize(mol: mpMolecule, a1: int, a2: int, a3: int, a4: int, tau: float):
+def pyramidalize(xyz: np.ndarray, a1: int, a2: int, a3: int, a4: int, tau: float):
     """Approximately pyramidalize a sp2 atom (a1) in mol. Tau must by < np.pi.
     
     Parameters
     ----------
-    mol : mpMolecule
-        The molecule.
+    xyz : `np.ndarray`
+        The molecular coordinates
     a1 : int
         The central atom around which the pyramidalization takes place.
     a2 : int
@@ -162,8 +137,8 @@ def pyramidalize(mol: mpMolecule, a1: int, a2: int, a3: int, a4: int, tau: float
     
     Returns
     -------
-    mpMolecule
-        The pyramidalized molecule.
+    `np.ndarray`
+        The pyramidalized molecular coordinates.
     
     Raises
     ------
@@ -177,7 +152,7 @@ def pyramidalize(mol: mpMolecule, a1: int, a2: int, a3: int, a4: int, tau: float
     # a1 is the pivot and remains in the same loc along with rest of molecule
     # a2 and a3 are rotated relative to the a1-a2-a3 plane
     # Move the pivot atom to the origin
-    shifted_xyz = mol.get_xyz()
+    shifted_xyz = xyz.copy()
     shifted_xyz -= shifted_xyz[a1]
     v_plane = np.cross(shifted_xyz[a2], shifted_xyz[a3])
     v14 = shifted_xyz[a4]
@@ -191,7 +166,7 @@ def pyramidalize(mol: mpMolecule, a1: int, a2: int, a3: int, a4: int, tau: float
     rotated_xyz[a2] = shifted_xyz[a2].dot(rot)
     rotated_xyz[a3] = shifted_xyz[a3].dot(rot)
 
-    return mpMolecule(rotated_xyz, mol.get_atoms())
+    return rotated_xyz
 
 
 def parse_pyscf_atom(atom):

@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from mppy.mpMolecule import mpMolecule
+from mppy.manipulation import rotate_dihedral
 
 
 xyz = np.array(
@@ -23,10 +24,18 @@ xyz = np.array(
     ]
 )
 atom = ["C", "C", "H", "H", "H", "H"]
-mol = mpMolecule(xyz, atom)
+npts = 1
+rotor = [2, 3]
+rotated_xyz = rotate_dihedral(0, 1, np.pi / 4, npts, rotor, xyz)
+
+mol = mpMolecule(rotated_xyz[1], atom)
 mol.get_bonds_by_distance()
+
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
 mol.plot(ax)
+ax.set_xlim3d(-2, 2)
+ax.set_ylim3d(-2, 2)
+ax.set_zlim3d(-2, 2)
 plt.show()

@@ -24,13 +24,12 @@ xyz = np.array(
 )
 
 atom = ["C", "H", "H", "C", "H", "H"]
-mol = mpMolecule(xyz, atom)
-mol.get_bonds_by_distance()
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
-mol2 = pyramidalize(mol, 0, 1, 2, 3, np.pi / 2)
-mol2.plot(ax)
+xyz2 = pyramidalize(xyz, 0, 1, 2, 3, np.pi / 2)
+mol = mpMolecule(xyz2, atom)
+mol.plot(ax)
 
 
 ax.set_xlim3d(-3, 3)
