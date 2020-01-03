@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import axes3d
 import numpy as np
 
 la = np.linalg
@@ -29,7 +27,7 @@ class mpMolecule:
         self._atom = np.zeros(xyz.shape[0], dtype=np.int)
 
         # If symbols given, convert to atomic number
-        if isinstance(atom[0], np.int64) != True:
+        if not isinstance(atom[0], np.int64):
             for i, ai in enumerate(atom):
                 # self._atom[i] = getattr(elements, ai).number
                 self._atom[i] = element(ai).atomic_number
