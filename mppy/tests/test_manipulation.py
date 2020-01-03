@@ -57,6 +57,28 @@ def test_dihedral_rotation():
     npt.assert_almost_equal(rotated_mols[0, 2], rotated_mols[2, 2])
 
 
+def test_pyramidalize():
+    xyz = np.array(
+        [
+            [-1.71614101, -0.62152133, 0.00000000],
+            [-1.18297727, -1.54922625, 0.00000000],
+            [-2.78614101, -0.62152133, 0.00000000],
+            [-1.04086671, 0.55345597, 0.00000000],
+            [-1.57403045, 1.48116089, 0.00000000],
+            [0.02913329, 0.55345597, 0.00000000],
+        ]
+    )
+    xyz -= xyz[0]
+
+    atom = ["C", "H", "H", "C", "H", "H"]
+    mol = mpMolecule(xyz, atom)
+
+    mol2 = manip.pyramidalize(mol, 0, 1, 2, 3, 1 / 3 * np.pi)
+    mol3 = manip.pyramidalize(mol2, 0, 1, 2, 3, -1 / 3 * np.pi)
+
+    npt.assert_almost_equal(mol.get_xyz(), mol3.get_xyz())
+
+
 def test_pyscf_parser():
     atom = """O 0. 0. 0.
         H 0. 1. 0.

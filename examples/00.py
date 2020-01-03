@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from mppy import mpMolecule
+from mppy.manipulation import rotate_dihedral
 
 atoms = ["C", "H", "H", "H", "C", "H", "C", "H", "C", "H", "H", "H"]
 xyz = np.array(
@@ -25,7 +26,7 @@ xyz = np.array(
 
 npts = 24
 rotor = np.arange(6)
-rotated_xyz = mpMolecule.rotate_dihedral(4, 6, 2 * np.pi / npts, npts, rotor, xyz)
+rotated_xyz = rotate_dihedral(4, 6, 2 * np.pi / npts, npts, rotor, xyz)
 
 # ffmpeg -framerate 24 -i %d.png test.mpeg
 n_repeats = 10

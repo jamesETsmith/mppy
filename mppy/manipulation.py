@@ -55,16 +55,6 @@ def align_vectors(v1, v2):
 
     return rotate(k, th)
 
-    """
-    
-    
-    Arguments:
-        k: 
-        th: 
-    Returns:
-        r: 
-    """
-
 
 def rotate(k: np.ndarray, th: float) -> np.ndarray:
     """Rotation around an axis k using Euler-Rodrigues parameterization for rotation.
@@ -150,6 +140,58 @@ def rotate_dihedral(
         rotated_xyz[i, rotor, :] = rtr
 
     return rotated_xyz
+
+
+def pyramidalize(mol: mpMolecule, a1: int, a2: int, a3: int, a4: int, tau: float):
+    """Approximately pyramidalize a sp2 atom (a1) in mol. Tau must by < np.pi.
+    
+    Parameters
+    ----------
+    mol : mpMolecule
+        The molecule.
+    a1 : int
+        The central atom around which the pyramidalization takes place.
+    a2 : int
+        One of the ligands that will be rotated.
+    a3 : int
+        The second ligand that will be rotated.
+    a4 : int
+        The third atom bonded to the central atom (used to calcualate rotation).
+    tau : float
+        The angle to rotate.
+    
+    Returns
+    -------
+    mpMolecule
+        The pyramidalized molecule.
+    
+    Raises
+    ------
+    ValueError
+        Raised if |tau| > np.pi.
+    """
+
+    if abs(tau) > np.pi:
+        raise ValueError("|tau| should be less than np.pi/2")
+
+    # a1 is the pivot and remains in the same loc along with rest of molecule
+    # a2 and a3 are rotated relative to the a1-a2-a3 plane
+    # Move the pivot atom to the origin
+    shifted_xyz = mol.get_xyz()
+    shifted_xyz -= shifted_xyz[a1]
+    v_plane = np.cross(shifted_xyz[a2], shifted_xyz[a3])
+    v14 = shifted_xyz[a4]
+    v_cross = np.cross(v_plane, v14)
+    rot = rotate(v_cross, tau)
+
+    rotated_xyz = shifted_xyz.copy()
+
+    # TODO this should be applied to the connected substructures
+    # not just the connecting atoms
+    rotated_xyz[a2] = shifted_xyz[a2].dot(rot)
+    rotated_xyz[a3] = shifted_xyz[a3].dot(rot)
+
+    return mpMolecule(rotated_xyz, mol.get_atoms())
 
 
 def parse_pyscf_atom(atom):

@@ -18,21 +18,23 @@ class mpMolecule:
         ----------
         xyz : `np.ndarray`
             2D array of coordinates (default in angstroms
-        atom : [type]
-            1D array of atomic numbers.
-        mass : [type], optional
+        atom : list or `np.ndarray`
+            Lit of atomic symbols or 1D array of atomic numbers.
+        mass : `np.ndarray`, optional
             1D array of masses, by default np.array([])
-        bonds : [type], optional
+        bonds : `np.ndarray`, optional
             2D array of bonds, by default np.array([])
         """
         self._xyz = xyz
         self._atom = np.zeros(xyz.shape[0], dtype=np.int)
 
         # If symbols given, convert to atomic number
-        if isinstance(atom[0], int) != True:
+        if isinstance(atom[0], np.int64) != True:
             for i, ai in enumerate(atom):
                 # self._atom[i] = getattr(elements, ai).number
                 self._atom[i] = element(ai).atomic_number
+        else:
+            self._atom = atom.copy()
 
         # Set masses as isotopically weighted avg if none given
         if mass.size == 0:
@@ -127,3 +129,19 @@ class mpMolecule:
                         bonds.append([i, j])
 
         self._bonds = np.array(bonds)
+
+    def get_xyz(self):
+        """Return a copy of the molecule's xyz coordinates.
+        
+        Returns
+        -------
+        `np.ndarray`
+            A copy of the molecules xyz coordinates.
+        """
+        return self._xyz.copy()
+
+    def get_atoms(self):
+        return self._atom.copy()
+
+    def dump_pyscf_atom(self):
+        return [[at, coord] for at, coord in zip(self._atom, self._xyz)]

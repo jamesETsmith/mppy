@@ -47,3 +47,19 @@ def test_mpMolecule_plot():
     mol.plot(ax)
     # plt.show()
     plt.close()
+
+
+def test_mpMolecule_dump_pyscf():
+    mol = setup()
+    pyscf_atom = mol.dump_pyscf_atom()
+
+    ans = [
+        [6, [3.402, 0.773, -9.252]],
+        [6, [4.697, 0.791, -8.909]],
+        [1, [2.933, -0.150, -9.521]],
+        [1, [2.837, 1.682, -9.258]],
+        [1, [5.262, -0.118, -8.904]],
+        [1, [5.167, 1.714, -8.641]],
+    ]
+
+    npt.assert_equal(pyscf_atom, ans)
